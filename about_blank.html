@@ -1,0 +1,350 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>about:blank</title>
+  <style>
+    :root {
+      --bg: #000000; /* Fond noir pur */
+      --card: #121212; /* Gris très très foncé */
+      --card-border: #333333; /* Contour gris pâle */
+      --muted: #9aa4b2;
+      --accent: #ffffff; /* Boutons blancs */
+      --btn-text: #000000; /* Écriture noire sur boutons */
+      --item-bg: #1a1a1a; /* Fond de liste gris plus foncé */
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: 'Inter', -apple-system, sans-serif; }
+    
+    body { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      background: var(--bg); 
+      color: #e6eef6; 
+      padding: 24px; 
+    }
+    
+    .card { 
+      width: 100%; 
+      max-width: 800px; 
+      background: var(--card); 
+      border: 1px solid var(--card-border); 
+      padding: 24px; 
+      border-radius: 12px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
+      max-height: 90vh; 
+      overflow-y: auto; 
+    }
+    
+    h1 { margin: 0 0 8px; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+    p.lead { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+    
+    .section-title { 
+      font-size: 12px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      color: #888; 
+      margin: 20px 0 10px; 
+      font-weight: bold; 
+      border-bottom: 1px solid #222; 
+      padding-bottom: 4px; 
+    }
+    
+    .row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+    
+    input[type="url"], select { 
+      width: 100%; 
+      padding: 10px 14px; 
+      border-radius: 10px; 
+      border: 1px solid #333; 
+      background: #000; 
+      color: inherit; 
+      font-size: 14px; 
+      outline: none; 
+    }
+    
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+    
+    button { 
+      padding: 10px 16px; 
+      border-radius: 10px; 
+      border: none; 
+      background: var(--accent); 
+      color: var(--btn-text); 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: opacity 0.2s; 
+    }
+    
+    button:hover { opacity: 0.9; }
+    
+    button.ghost { 
+      background: transparent; 
+      border: 1px solid #333; 
+      color: #fff; 
+    }
+    
+    .grid-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    
+    label.toggle { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      padding: 8px 10px; 
+      border-radius: 8px; 
+      border: 1px solid #222; 
+      cursor: pointer; 
+      background: #0a0a0a; 
+      font-size: 13px; 
+    }
+    
+    .history-list, .fav-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    
+    .item { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 8px 12px; 
+      border-radius: 8px; 
+      background: var(--item-bg); 
+      font-size: 13px; 
+    }
+    
+    .url-text { cursor: pointer; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ccc; }
+    .url-text:hover { color: #fff; }
+    
+    .btn-close { 
+      cursor: pointer; 
+      font-family: 'Arial', sans-serif; 
+      font-size: 16px; 
+      color: #555; 
+      line-height: 1; 
+      margin-left: 10px; 
+      transition: color 0.2s; 
+    }
+    .btn-close:hover { color: #ff4d4d; }
+    
+    footer { margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width:600px){ footer { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>about:blank</h1>
+    
+    <div class="row">
+      <input id="url" type="url" placeholder="https://example.com" autocomplete="off" />
+      <button id="addFav" title="Favori" class="ghost" style="font-size: 18px; padding: 5px 12px;">☆</button>
+    </div>
+
+
+    <div class="section-title">Configuration</div>
+    <div class="grid-options">
+      <div>
+        <label class="small" style="margin-bottom:5px; display:block; font-size: 11px;">Mode Camouflage :</label>
+        <select id="cloakSelect">
+          <option value="none">Aucun (about:blank)</option>
+          <option value="google">Google Search</option>
+          <option value="drive">Google Drive</option>
+          <option value="docs">Google Docs</option>
+          <option value="classroom">Google Classroom</option>
+          <option value="gmail">Gmail</option>
+          <option value="desmos">Desmos</option>
+          <option value="wordreference">WordReference</option>
+          <option value="usito">Usito</option>
+        </select>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <label class="toggle"><input id="mode" type="checkbox"> Inject (fetch)</label>
+        <label class="toggle"><input id="useEruda" type="checkbox"> Console Dev</label>
+      </div>
+    </div>
+
+
+    <div class="controls">
+      <button id="open" style="flex:1">Ouvrir la page</button>
+      <button id="openNew" class="ghost">Onglet normal</button>
+      <button id="clearAll" class="ghost">Reset</button>
+    </div>
+
+
+    <footer>
+      <div>
+        <div class="section-title">★ Favoris Épinglés</div>
+        <ul id="favList" class="fav-list"></ul>
+      </div>
+      <div>
+        <div class="section-title">Historique</div>
+        <ul id="historyList" class="history-list"></ul>
+      </div>
+    </footer>
+  </main>
+
+
+  <script>
+    const urlInput = document.getElementById('url');
+    const historyList = document.getElementById('historyList');
+    const favList = document.getElementById('favList');
+    const addFavBtn = document.getElementById('addFav');
+    
+    const cloaks = {
+      google: { title: 'Google', icon: 'https://www.google.com/favicon.ico' },
+      drive: { title: 'Mon Disque - Google Drive', icon: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png' },
+      docs: { title: 'Google Docs', icon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
+      classroom: { title: 'Accueil - Classroom', icon: 'https://ssl.gstatic.com/classroom/favicon.png' },
+      gmail: { title: 'Boîte de réception', icon: 'https://www.google.com/a/cpanel/educrm.ca/images/favicon.ico' },
+      desmos: { title: 'Desmos | Testing', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGxcgDGvvNikiUHVkRgGrFkCdRgKQw_4wLUg&s' },
+
+
+      wordreference: { title: 'English to French Dictionary - WordReference.com', icon: 'https://alfred.app/workflows/alexmartinfr/wordreference/icon.png' },
+      usito: { title: 'Dictionnaire Usito', icon: 'https://usito.usherbrooke.ca/favicon.ico' }
+    };
+
+
+    const getStore = (key) => JSON.parse(localStorage.getItem(key) || '[]');
+    const setStore = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+
+
+    function updateFavButton() {
+      const url = urlInput.value.trim();
+      const favs = getStore('favs');
+      addFavBtn.textContent = favs.includes(url) ? '★' : '☆';
+    }
+
+
+    urlInput.oninput = updateFavButton;
+
+
+    function renderList(element, data, isFav) {
+      element.innerHTML = data.length ? '' : '<li style="font-size:12px; color:#444">Vide</li>';
+      data.forEach((url, index) => {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.innerHTML = `
+          <span class="url-text">${url}</span>
+          <span class="btn-close" onclick="${isFav ? 'removeFav' : 'deleteHistory'}(${index})">×</span>
+        `;
+        li.querySelector('.url-text').onclick = () => {
+            urlInput.value = url;
+            updateFavButton();
+        };
+        element.appendChild(li);
+      });
+    }
+
+
+    window.removeFav = (idx) => { 
+      let f = getStore('favs'); f.splice(idx,1); setStore('favs', f); 
+      init(); updateFavButton();
+    };
+    
+    window.deleteHistory = (idx) => { 
+      let h = getStore('hist'); h.splice(idx,1); setStore('hist', h); 
+      init(); 
+    };
+
+
+    addFavBtn.onclick = () => {
+      const url = urlInput.value.trim();
+      if(!url) return;
+      let f = getStore('favs');
+      if(f.includes(url)) {
+        f = f.filter(u => u !== url);
+      } else {
+        f.push(url);
+      }
+      setStore('favs', f);
+      init();
+      updateFavButton();
+    };
+
+
+    function saveHistory(url) {
+      let h = getStore('hist').filter(u => u !== url);
+      h.unshift(url);
+      setStore('hist', h.slice(0, 10));
+      init();
+    }
+
+
+    function init() {
+      renderList(historyList, getStore('hist'), false);
+      renderList(favList, getStore('favs'), true);
+      updateFavButton();
+    }
+
+
+    function normalize(u){ try{return new URL(u).toString()}catch{try{return new URL('https://'+u).toString()}catch{return null}}}
+
+
+    document.getElementById('open').onclick = async () => {
+      const url = normalize(urlInput.value.trim());
+      if(!url) return alert("URL invalide");
+      
+      saveHistory(url);
+      const w = window.open('about:blank', '_blank');
+      const cloakKey = document.getElementById('cloakSelect').value;
+      const useEruda = document.getElementById('useEruda').checked;
+      const useInject = document.getElementById('mode').checked;
+
+
+      if(cloakKey !== 'none') {
+        w.document.title = cloaks[cloakKey].title;
+        const link = w.document.createElement('link');
+        link.rel = 'icon'; link.href = cloaks[cloakKey].icon;
+        w.document.head.appendChild(link);
+      }
+
+
+      w.document.documentElement.style.cssText = "height:100%; margin:0; padding:0;";
+      w.document.body.style.cssText = "height:100%; margin:0; padding:0; overflow:hidden;";
+
+
+      if(!useInject) {
+        const ifr = w.document.createElement('iframe');
+        ifr.style.cssText = "width:100%; height:100%; border:none; margin:0; padding:0;";
+        ifr.src = url;
+        w.document.body.appendChild(ifr);
+      } else {
+        try {
+          const res = await fetch(url);
+          let html = await res.text();
+          w.document.open();
+          w.document.write(html);
+          if(useEruda) {
+            const script = w.document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/eruda";
+            script.onload = () => { w.eruda.init(); w.eruda.show(); };
+            w.document.head.appendChild(script);
+          }
+          w.document.close();
+        } catch(e) { 
+          alert("Erreur Fetch (CORS). Utilisez le mode normal.");
+          w.close();
+        }
+      }
+    };
+
+
+    document.getElementById('openNew').onclick = () => {
+      const url = normalize(urlInput.value.trim());
+      if(url) { saveHistory(url); window.open(url, '_blank'); }
+    };
+
+
+    document.getElementById('clearAll').onclick = () => {
+      if(confirm("Tout effacer ?")) {
+        localStorage.clear();
+        urlInput.value = '';
+        init();
+      }
+    };
+
+
+    init();
+  </script>
+</body>
+</html>

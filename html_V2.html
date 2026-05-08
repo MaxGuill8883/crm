@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Multi Fenêtres</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #ccc;
+        margin: 0;
+    }
+
+
+    .site-box {
+        position: fixed;
+        top: 40px;
+        left: 40px;
+        width: 800px;
+        height: 600px;
+        background: #fff;
+        border: 1px solid #888;
+        border-radius: 8px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 10;
+    }
+
+
+    .site-h {
+        background: #111;
+        color: white;
+        padding: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: move;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+
+    .site-h button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        margin-left: 3px;
+    }
+
+
+    iframe {
+        flex: 1;
+        border: none;
+        width: 100%;
+        height: 100%;
+    }
+
+
+    #new-window-btn {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        padding: 8px 12px;
+        background: #006aff;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+        font-size: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+</style>
+</head>
+<body>
+
+
+<button id="new-window-btn">Nouvelle fenêtre</button>
+
+
+<script>
+/* ------------------------------------------
+   CRÉATION D’UNE NOUVELLE FENÊTRE
+-------------------------------------------*/
+function createWindow(initialURL = "about:blank") {
+
+
+    const box = document.createElement("div");
+    box.className = "site-box";
+
+
+    box.innerHTML = `
+        <div class="site-h">
+            🌐 Site
+            <div>
+                <button class="change" style="background:#006aff;">Changer</button>
+                <button class="html" style="background:#f39c12;">HTML</button>
+                <button class="search" style="background:#9b59b6;">Search</button>
+                <button class="yt" style="background:#ff0000;">YT</button>
+
+
+                <button class="plus" style="background:#2ecc71;">+</button>
+                <button class="minus" style="background:#e67e22;">-</button>
+                <button class="min" style="background:#3498db;">=</button>
+                <button class="max" style="background:#1abc9c;">⬜</button>
+
+
+                <button class="close" style="background:#c0392b;">X</button>
+            </div>
+        </div>
+
+
+        <iframe src="${initialURL}"></iframe>
+    `;
+
+
+    document.body.appendChild(box);
+
+
+    const iframe = box.querySelector("iframe");
+
+
+    let minimized = false;
+    let maximized = false;
+    let prevState = {
+        w: box.style.width,
+        h: box.style.height,
+        left: box.style.left,
+        top: box.style.top
+    };
+
+
+    /* ------------------- BOUTONS ------------------- */
+    box.querySelector(".close").onclick = () => box.remove();
+
+
+    box.querySelector(".change").onclick = () => {
+        let url = prompt("Nouvelle URL :");
+        if (url) iframe.src = url;
+    };
+
+
+    box.querySelector(".html").onclick = () => {
+        let input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".html";
+        input.onchange = e => {
+            let file = e.target.files[0];
+            if (!file) return;
+            let r = new FileReader();
+            r.onload = ev => {
+                let doc = iframe.contentDocument || iframe.contentWindow.document;
+                doc.open();
+                doc.write(ev.target.result);
+                doc.close();
+            };
+            r.readAsText(file);
+        };
+        input.click();
+    };
+
+
+    box.querySelector(".search").onclick = () =>
+        iframe.src = "https://eviltester.github.io/TestingApp/apps/iframe-search/iframe-search.html";
+
+
+    box.querySelector(".yt").onclick = () => {
+        let yt = prompt("Lien YouTube :");
+        if (yt) iframe.src = yt.replace(".com", ".ttools.io");
+    };
+
+
+    box.querySelector(".plus").onclick = () => {
+        box.style.width = box.offsetWidth + 50 + "px";
+        box.style.height = box.offsetHeight + 50 + "px";
+    };
+
+
+    box.querySelector(".minus").onclick = () => {
+        box.style.width = Math.max(200, box.offsetWidth - 50) + "px";
+        box.style.height = Math.max(150, box.offsetHeight - 50) + "px";
+    };
+
+
+    /* -------- minimiser (=) -------- */
+    box.querySelector(".min").onclick = () => {
+        if (!minimized) {
+            prevState.h = box.style.height;
+            iframe.style.display = "none";
+            box.style.height = "42px";
+            minimized = true;
+        } else {
+            box.style.height = prevState.h;
+            iframe.style.display = "block";
+            minimized = false;
+        }
+    };
+
+
+    /* -------- maximiser (⬜) -------- */
+    box.querySelector(".max").onclick = () => {
+        if (!maximized) {
+            prevState = {
+                w: box.style.width,
+                h: box.style.height,
+                left: box.style.left,
+                top: box.style.top
+            };
+            box.style.left = "0";
+            box.style.top = "0";
+            box.style.width = "100vw";
+            box.style.height = "100vh";
+            maximized = true;
+        } else {
+            box.style.width = prevState.w;
+            box.style.height = prevState.h;
+            box.style.left = prevState.left;
+            box.style.top = prevState.top;
+            maximized = false;
+        }
+    };
+
+
+    /* ---------------- DRAG ---------------- */
+    let dragging = false, ox = 0, oy = 0;
+    const header = box.querySelector(".site-h");
+
+
+    header.addEventListener("mousedown", e => {
+        dragging = true;
+        ox = e.clientX;
+        oy = e.clientY;
+    });
+
+
+    document.addEventListener("mousemove", e => {
+        if (!dragging) return;
+        let dx = e.clientX - ox;
+        let dy = e.clientY - oy;
+        ox = e.clientX;
+        oy = e.clientY;
+
+
+        const r = box.getBoundingClientRect();
+        box.style.left = r.left + dx + "px";
+        box.style.top = r.top + dy + "px";
+    });
+
+
+    document.addEventListener("mouseup", () => dragging = false);
+}
+
+
+/* bouton pour créer une nouvelle fenêtre */
+document.getElementById("new-window-btn").onclick = () => createWindow();
+</script>
+
+
+</body>
+</html>
